@@ -9,6 +9,8 @@ from .frame import JevFrame
 from .questions import choice, noul, score
 from .result import JevResult
 
+__version__ = "0.1.0"
+
 __all__ = [
     "JevClient",
     "JevError",

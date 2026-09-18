@@ -19,6 +19,9 @@ export TYPESAFE_MODEL=jev-latest
 (`https://api.typesafe.ai/v1`, `jev-latest`). Any TypeSafe System One compatible endpoint works;
 pass `base_url`, `api_key`, and `model` to `JevClient` to override.
 
+For notebook work (JupyterLab, ipykernel, and the optional `tqdm_progress()` bar), install the
+`notebook` extra as well: `uv sync --extra dev --extra notebook`.
+
 ## Notebook
 
 ```python

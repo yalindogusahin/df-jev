@@ -34,15 +34,22 @@ def validate(question: dict) -> None:
         raise ValueError("Write a nonempty instruction")
     if question["type"] == "choice":
         criteria = question.get("criteria")
-        if not 2 <= len(criteria) <= 255 or not all(
-            isinstance(k, str) and k.strip() and isinstance(v, str) and v.strip()
-            for k, v in criteria.items()
+        if (
+            not isinstance(criteria, Mapping)
+            or not 2 <= len(criteria) <= 255
+            or not all(
+                isinstance(k, str) and k.strip() and isinstance(v, str) and v.strip()
+                for k, v in criteria.items()
+            )
         ):
             raise ValueError("Supply 2–255 nonempty category labels and descriptions")
     elif question["type"] == "score":
         criteria = question.get("criteria")
-        if not 2 <= len(criteria) <= 10 or not all(
-            isinstance(level, str) and level.strip() for level in criteria
+        if (
+            not isinstance(criteria, Sequence)
+            or isinstance(criteria, (str, bytes))
+            or not 2 <= len(criteria) <= 10
+            or not all(isinstance(level, str) and level.strip() for level in criteria)
         ):
             raise ValueError("Supply 2–10 nonempty ordered score levels")
 

@@ -7,7 +7,7 @@
 Open it with:
 
 ```bash
-uv sync --extra dev        # installs pandas, jupyterlab, ipykernel, pytest, ruff into .venv
+uv sync --extra dev --extra notebook  # adds pandas, jupyterlab, ipykernel, tqdm, pytest, ruff to .venv
 uv run jupyter lab examples/test_jevpandas.ipynb
 # or: uv run jupyter notebook examples/test_jevpandas.ipynb
 ```

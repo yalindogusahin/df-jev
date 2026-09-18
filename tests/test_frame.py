@@ -190,6 +190,15 @@ def test_v1_base_url_is_not_duplicated():
         client.decide({"message": "a"}, {"type": "noul", "instructions": "Condition"})
 
 
+def test_custom_base_url_appends_v1_systemone():
+    def handler(request):
+        assert str(request.url) == "http://test:8000/v1/systemone"
+        return httpx.Response(200, json=response(request))
+
+    with JevClient("http://test:8000", transport=httpx.MockTransport(handler)) as client:
+        client.decide({"message": "a"}, {"type": "noul", "instructions": "Condition"})
+
+
 def test_parallel_run_preserves_order_and_isolates_failed_rows():
     def handler(request):
         message = json.loads(request.content)["state"]["message"]

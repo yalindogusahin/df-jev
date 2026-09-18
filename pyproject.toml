@@ -4,23 +4,76 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jevpandas"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Inspect pandas dataframes with natural-language judgments from Jev-compatible endpoints."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Yalın Doğu Şahin", email = "yalindogusahin@users.noreply.github.com" },
+]
 requires-python = ">=3.10"
+keywords = [
+    "pandas",
+    "dataframe",
+    "natural-language",
+    "semantic-search",
+    "classification",
+    "scoring",
+    "jev",
+    "typesafe",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+]
 dependencies = ["pandas>=2.2,<3", "httpx>=0.28,<1"]
 
 [project.optional-dependencies]
+progress = ["tqdm>=4"]
 dev = [
     "pandas>=2.2,<3",
     "pytest>=8,<10",
     "ruff>=0.11",
     "jupyterlab>=4,<5",
     "ipykernel>=6,<7",
+    "tqdm>=4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yalindogusahin/jevpandas"
+Repository = "https://github.com/yalindogusahin/jevpandas"
+Issues = "https://github.com/yalindogusahin/jevpandas/issues"
+Documentation = "https://docs.typesafe.ai/introduction"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jevpandas"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/jevpandas",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "data",
+    "examples",
+    "scripts",
+    "docs",
+]
+
+[tool.hatch.version]
+path = "src/jevpandas/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
