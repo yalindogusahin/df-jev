@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 from generate_sample import CONDITION
 
-from df_jev import JevClient, JevFrame
+from jevpandas import JevClient, JevFrame
 
 ROOT = Path(__file__).resolve().parents[1]
 

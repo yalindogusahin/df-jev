@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import threading
 import time
 from collections import OrderedDict
 from copy import deepcopy
@@ -27,10 +28,8 @@ def _number(value: Any, low: float, high: float) -> float:
     return float(value)
 
 
-def _validate(response: Any, question: dict) -> None:
-    if not isinstance(response.get("model"), str) or not response["model"]:
-        raise ValueError("Missing model identifier")
-    answer = response["answers"]["result"]
+def _validate_answer(answer: Any, question: dict) -> None:
+    """Validate one typed answer against its question."""
     kind = question["type"]
     if answer["type"] != kind:
         raise ValueError("Wrong answer type")
@@ -52,6 +51,17 @@ def _validate(response: Any, question: dict) -> None:
         raise ValueError("Unknown category")
     if kind == "score":
         _number(answer["score"], 0, len(expected) - 1)
+
+
+def _validate_many(response: Any, questions: dict) -> None:
+    """Validate a response containing answers for several named questions."""
+    if not isinstance(response.get("model"), str) or not response["model"]:
+        raise ValueError("Missing model identifier")
+    answers = response["answers"]
+    if set(answers) != set(questions):
+        raise ValueError("Answer names do not match the questions")
+    for name, question in questions.items():
+        _validate_answer(answers[name], question)
 
 
 class JevClient:
@@ -91,6 +101,7 @@ class JevClient:
         self.retries = retries
         self.cache_size = cache_size
         self._cache: OrderedDict[str, dict] = OrderedDict()
+        self._lock = threading.Lock()
         self._http = httpx.Client(
             headers={
                 "Authorization": f"Bearer {api_key or os.getenv('TYPESAFE_API_KEY', 'dummy')}"
@@ -101,7 +112,8 @@ class JevClient:
         )
 
     def clear_cache(self) -> None:
-        self._cache.clear()
+        with self._lock:
+            self._cache.clear()
 
     def close(self) -> None:
         self._http.close()
@@ -113,13 +125,24 @@ class JevClient:
         self.close()
 
     def decide(self, state: dict, question: dict) -> tuple[dict, bool]:
-        payload = {"model": self.model, "state": state, "questions": {"result": question}}
+        """Ask one question. Returns (response, cached); response has answers.result."""
+        return self.decide_many(state, {"result": question})
+
+    def decide_many(self, state: dict, questions: dict) -> tuple[dict, bool]:
+        """Ask several named questions in one request. Returns (response, cached).
+
+        The response has ``answers`` keyed by the question names. Safe to call from
+        multiple threads; the cache is guarded by a lock and the HTTP client is
+        thread-safe. Identical requests reuse the same in-memory decision.
+        """
+        payload = {"model": self.model, "state": state, "questions": questions}
         key = sha256(
             (self.base_url + json.dumps(payload, sort_keys=True, allow_nan=False)).encode()
         ).hexdigest()
-        if key in self._cache:
-            self._cache.move_to_end(key)
-            return deepcopy(self._cache[key]), True
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+                return deepcopy(self._cache[key]), True
         suffix = "/systemone" if self.base_url.endswith("/v1") else "/v1/systemone"
         for attempt in range(self.retries + 1):
             retry_after = None
@@ -139,13 +162,14 @@ class JevClient:
             else:
                 try:
                     result = response.json()
-                    _validate(result, question)
+                    _validate_many(result, questions)
                 except (ValueError, TypeError, KeyError, AttributeError) as exc:
                     raise JevError("Endpoint returned an invalid decision") from exc
                 if self.cache_size:
-                    self._cache[key] = deepcopy(result)
-                    if len(self._cache) > self.cache_size:
-                        self._cache.popitem(last=False)
+                    with self._lock:
+                        self._cache[key] = deepcopy(result)
+                        if len(self._cache) > self.cache_size:
+                            self._cache.popitem(last=False)
                 return result, False
             if attempt < self.retries:
                 try:
