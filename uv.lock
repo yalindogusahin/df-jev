@@ -735,7 +735,7 @@ wheels = [
 ]
 
 [[package]]
-name = "jevpandas"
+name = "jev-pandas"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

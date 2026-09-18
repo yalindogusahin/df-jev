@@ -1,4 +1,4 @@
-# jevpandas
+# jev-pandas
 
 Explore a pandas dataframe using natural-language judgments from [Jev](https://docs.typesafe.ai/introduction)
 (TypeSafe System One) compatible endpoints. Find incidents by meaning, classify records, or score
@@ -23,7 +23,8 @@ flowchart LR
 
 ## Install
 
-Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/). The PyPI distribution is
+`jev-pandas`; the import name is `jevpandas`.
 
 ```bash
 uv sync --extra dev

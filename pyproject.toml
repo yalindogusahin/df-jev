@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "jevpandas"
+name = "jev-pandas"
 dynamic = ["version"]
 description = "Inspect pandas dataframes with natural-language judgments from Jev-compatible endpoints."
 readme = "README.md"
@@ -58,9 +58,9 @@ notebook = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yalindogusahin/jevpandas"
-Repository = "https://github.com/yalindogusahin/jevpandas"
-Issues = "https://github.com/yalindogusahin/jevpandas/issues"
+Homepage = "https://github.com/yalindogusahin/jev-pandas"
+Repository = "https://github.com/yalindogusahin/jev-pandas"
+Issues = "https://github.com/yalindogusahin/jev-pandas/issues"
 Documentation = "https://docs.typesafe.ai/introduction"
 
 [tool.hatch.build.targets.wheel]
