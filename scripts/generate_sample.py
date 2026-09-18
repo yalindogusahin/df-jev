@@ -166,7 +166,9 @@ def main():
     random.Random(42).shuffle(rows)
     rows = rows[: args.rows]
     incidents = [{k: v for k, v in row.items() if k != "expected_match"} for row in rows]
-    labels = [{"incident_id": row["incident_id"], "expected_match": row["expected_match"]} for row in rows]
+    labels = [
+        {"incident_id": row["incident_id"], "expected_match": row["expected_match"]} for row in rows
+    ]
 
     (ROOT / "data").mkdir(exist_ok=True)
     with (ROOT / "data/incidents.csv").open("w", newline="") as file:
@@ -175,7 +177,9 @@ def main():
         writer.writerows(incidents)
     pd.DataFrame(incidents).to_parquet(ROOT / "data/incidents.parquet", index=False)
     with (ROOT / "data/incident_labels.csv").open("w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=["incident_id", "expected_match"], lineterminator="\n")
+        writer = csv.DictWriter(
+            file, fieldnames=["incident_id", "expected_match"], lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(labels)
     print(
