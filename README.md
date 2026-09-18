@@ -4,6 +4,23 @@ Explore a pandas dataframe using natural-language judgments from [Jev](https://d
 (TypeSafe System One) compatible endpoints. Find incidents by meaning, classify records, or score
 them against a rubric — from a notebook or a script. No generative chat model needed.
 
+```mermaid
+flowchart LR
+    DF["pandas DataFrame"] --> JF["JevFrame(df, client)"]
+    CL["JevClient(base_url, api_key, model)"] --> JF
+    JF --> EV["evaluate(condition)"]
+    JF --> FI["filter(condition, threshold)"]
+    JF --> CLS["classify(question, choices)"]
+    JF --> SC["score(question, levels)"]
+    JF --> ASK["ask({name: noul | choice | score})"]
+    EV --> RES["JevResult"]
+    FI --> RES
+    CLS --> RES
+    SC --> RES
+    ASK --> RES
+    RES --> OUT["original rows + judgment columns, metadata"]
+```
+
 ## Install
 
 Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
