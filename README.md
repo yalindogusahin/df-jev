@@ -45,7 +45,7 @@ For notebook work (JupyterLab, ipykernel, and the optional `tqdm_progress()` bar
 import pandas as pd
 from jevpandas import JevClient, JevFrame, noul, choice, score, tqdm_progress
 
-df = pd.read_csv("data/incidents.csv")
+df = pd.read_parquet("data/incidents.parquet")  # 1,000 synthetic rows; read_csv("data/incidents.csv") works too
 
 with JevClient() as client:
     incidents = JevFrame(df, client)
@@ -140,7 +140,7 @@ accuracy on production data.
 ```bash
 uv run pytest
 uv run ruff check .
-# Calls the configured server on 100 synthetic rows and writes ignored output/ files:
+# Calls the configured server on 1,000 synthetic rows and writes ignored output/ files:
 uv run python scripts/evaluate_sample.py
 ```
 

@@ -1,8 +1,9 @@
 # Examples
 
 - `test_jevpandas.ipynb` — a ready-to-open notebook that exercises `jevpandas` from Jupyter:
-  a live run against the official Jev endpoint and an offline run against a mocked endpoint
-  (no server, no API key).
+  it loads the 1,000-row synthetic fixture (`data/incidents.parquet`; a matching CSV is also
+  provided), then runs a live run against the official Jev endpoint and an offline run against a
+  mocked endpoint (no server, no API key).
 
 Open it with:
 

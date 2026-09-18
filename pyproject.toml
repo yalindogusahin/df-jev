@@ -50,6 +50,12 @@ dev = [
     "ipykernel>=6,<7",
     "tqdm>=4",
 ]
+notebook = [
+    "jupyterlab>=4,<5",
+    "ipykernel>=6,<7",
+    "tqdm>=4",
+    "pyarrow>=16",
+]
 
 [project.urls]
 Homepage = "https://github.com/yalindogusahin/jevpandas"

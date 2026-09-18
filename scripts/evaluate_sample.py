@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from generate_sample import CONDITION
+from generate_sample import CASES, CONDITION
 
 from jevpandas import JevClient, JevFrame
 
@@ -30,7 +30,10 @@ def main():
         actual = result.incident_id.map(labels.expected_match)
         summary = {
             **result.attrs["jev"],
-            "fixture": "100 synthetic rows from 20 scenario templates, each used with 5 services",
+            "fixture": (
+                f"{len(df)} synthetic rows from {len(CASES)} scenario templates "
+                f"across {df.service.nunique()} services"
+            ),
             "threshold": 0.7,
             "returned_models": result.match_model.dropna().unique().tolist(),
             "true_positives": int((valid & predicted & actual).sum()),

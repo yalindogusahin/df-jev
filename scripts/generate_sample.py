@@ -1,9 +1,13 @@
 """Generate reproducible synthetic fixtures; never use these as production benchmarks."""
 
+import argparse
 import csv
+import math
 import random
 from datetime import date, timedelta
 from pathlib import Path
+
+import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 CONDITION = (
@@ -115,15 +119,38 @@ CASES = [
     ),
 ]
 
+NAMED_SERVICES = ["customer-portal", "analytics", "billing-console", "workspace", "reports"]
+
+
+def build_services(count: int) -> list[str]:
+    """Return ``count`` service names, reusing the named ones and then numbered ones."""
+    if count <= len(NAMED_SERVICES):
+        return NAMED_SERVICES[:count]
+    services = list(NAMED_SERVICES)
+    index = 1
+    while len(services) < count:
+        services.append(f"service-{index:02d}")
+        index += 1
+    return services
+
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--rows",
+        type=int,
+        default=1000,
+        help="target number of rows; services are scaled up to cover every scenario (default: 1000)",
+    )
+    args = parser.parse_args()
+    if args.rows < 1:
+        raise SystemExit("--rows must be positive")
+
+    services = build_services(max(1, math.ceil(args.rows / len(CASES))))
     rows = []
-    for variant in range(5):
+    for variant, service in enumerate(services):
         for case_number, (subject, message, expected) in enumerate(CASES):
             number = variant * len(CASES) + case_number + 1
-            service = ["customer-portal", "analytics", "billing-console", "workspace", "reports"][
-                variant
-            ]
             rows.append(
                 {
                     "incident_id": f"INC-{number:04d}",
@@ -137,19 +164,24 @@ def main():
                 }
             )
     random.Random(42).shuffle(rows)
+    rows = rows[: args.rows]
+    incidents = [{k: v for k, v in row.items() if k != "expected_match"} for row in rows]
+    labels = [{"incident_id": row["incident_id"], "expected_match": row["expected_match"]} for row in rows]
+
     (ROOT / "data").mkdir(exist_ok=True)
     with (ROOT / "data/incidents.csv").open("w", newline="") as file:
-        writer = csv.DictWriter(
-            file, fieldnames=[k for k in rows[0] if k != "expected_match"], lineterminator="\n"
-        )
+        writer = csv.DictWriter(file, fieldnames=list(incidents[0]), lineterminator="\n")
         writer.writeheader()
-        writer.writerows({k: v for k, v in row.items() if k != "expected_match"} for row in rows)
+        writer.writerows(incidents)
+    pd.DataFrame(incidents).to_parquet(ROOT / "data/incidents.parquet", index=False)
     with (ROOT / "data/incident_labels.csv").open("w", newline="") as file:
-        writer = csv.DictWriter(
-            file, fieldnames=["incident_id", "expected_match"], lineterminator="\n"
-        )
+        writer = csv.DictWriter(file, fieldnames=["incident_id", "expected_match"], lineterminator="\n")
         writer.writeheader()
-        writer.writerows({k: row[k] for k in writer.fieldnames} for row in rows)
+        writer.writerows(labels)
+    print(
+        f"Wrote {len(rows):,} rows ({len(services)} services x {len(CASES)} scenarios) "
+        f"to data/incidents.csv and data/incidents.parquet"
+    )
 
 
 if __name__ == "__main__":
